@@ -1,5 +1,7 @@
 #include "../headers/header.hpp"
 
+HMODULE library{ NULL };
+
 BOOL enable_console(void) noexcept
 {
   if (!AllocConsole()) { return FALSE; }
@@ -27,7 +29,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   {
     if (FALSE == enable_console()) { return FALSE; }
 
-    auto library{ LoadLibrary(TEXT("_sgup_api.dll")) };
+    library = LoadLibrary(TEXT("_sgup_api.dll"));
     if (NULL == library) { return FALSE; }
 
     SGUPAPI_GetAuthToken_external = reinterpret_cast<SGUPAPI_GetAuthToken_t>(GetProcAddress(library, "SGUPAPI_GetAuthToken"));
@@ -118,6 +120,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
   }
 
   case DLL_THREAD_ATTACH:
+    if (NULL != library) { FreeLibrary(library); }
     break;
 
   case DLL_THREAD_DETACH:
